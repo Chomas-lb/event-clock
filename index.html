@@ -2,8 +2,8 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>イベントマスタークロック v16</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>イベントマスタークロック v18</title>
     <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Share+Tech+Mono&family=Roboto+Mono:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -16,100 +16,52 @@
             --font-weight: 900;
         }
 
-        * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+        * { box-sizing: border-box; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100dvh; background-color: var(--bg-color); color: var(--text-color); font-family: sans-serif; overflow: hidden; display: flex; justify-content: center; align-items: center; }
 
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            background-color: var(--bg-color); color: var(--text-color);
-            font-family: sans-serif; overflow: hidden;
-            display: flex; justify-content: center; align-items: center;
-        }
+        body::before { content: " "; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03)); background-size: 100% 4px, 3px 100%; z-index: 10; pointer-events: none; }
 
-        /* 走査線エフェクト */
-        body::before {
-            content: " "; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
-                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-            background-size: 100% 4px, 3px 100%; z-index: 10; pointer-events: none;
-        }
+        .touch-controls { position: fixed; top: env(safe-area-inset-top, 20px); right: env(safe-area-inset-right, 20px); display: flex; gap: 10px; z-index: 100; transition: opacity 0.3s; }
+        .control-btn { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--text-color); color: var(--text-color); padding: 10px 15px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; backdrop-filter: blur(5px); text-shadow: 0 0 5px var(--glow-color); }
 
-        /* タッチデバイス用コントロール */
-        .touch-controls {
-            position: fixed; top: 20px; right: 20px;
-            display: flex; gap: 15px; z-index: 100;
-        }
-        .control-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid var(--text-color);
-            color: var(--text-color);
-            padding: 10px 15px; border-radius: 8px;
-            font-size: 14px; font-weight: bold;
-            cursor: pointer; backdrop-filter: blur(5px);
-            text-shadow: 0 0 5px var(--glow-color);
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-        }
-        .control-btn:active { background: var(--text-color); color: #000; }
+        .container { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; width: 100vw; height: 100dvh; z-index: 5; }
+        #phase-area { display: none; margin-bottom: 1vh; text-shadow: 0 0 10px var(--glow-color); }
+        #display-phase-name { display: block; font-size: 4.5vw; font-weight: 900; margin-bottom: -0.5vh; }
+        #display-countdown-wrap { display: block; font-size: 3vw; font-weight: 700; opacity: 0.9; }
 
-        .container { 
-            display: flex; flex-direction: column; justify-content: center; 
-            align-items: center; text-align: center; width: 100vw; height: 100vh; z-index: 5; 
-        }
-
-        #phase-area {
-            display: none; margin-bottom: 1vh; text-shadow: 0 0 10px var(--glow-color);
-        }
-        #display-phase-name {
-            display: block; font-size: 4.5vw; font-weight: 900; margin-bottom: -0.5vh;
-        }
-        #display-countdown-wrap {
-            display: block; font-size: 3vw; font-weight: 700; opacity: 0.9;
-        }
-
-        #clock {
-            font-family: var(--clock-font); font-weight: var(--font-weight);
-            font-size: 26vw; line-height: 1; text-shadow: 0 0 20px var(--glow-color), 0 0 40px var(--glow-color);
-            cursor: pointer; white-space: nowrap; display: flex; align-items: center; justify-content: center;
-        }
-
+        #clock { font-family: var(--clock-font); font-weight: var(--font-weight); font-size: 26vw; line-height: 1; text-shadow: 0 0 20px var(--glow-color), 0 0 40px var(--glow-color); cursor: pointer; white-space: nowrap; display: flex; align-items: center; justify-content: center; }
         .digit { display: inline-block; width: var(--digit-width); text-align: center; }
         .colon { display: inline-block; font-size: 0.85em; margin: 0 var(--colon-margin); text-align: center; transform: translateY(-0.03em); }
         .blink { animation: blink-animation 1s steps(2, start) infinite; }
         @keyframes blink-animation { to { visibility: hidden; } }
 
-        #font-indicator { position: fixed; bottom: 3vh; left: 4vw; font-size: 1.5vw; font-weight: bold; opacity: 0.4; font-family: monospace; z-index: 20; }
-
-        .font-nav {
-            position: fixed; bottom: 3vh; width: 100%; display: flex;
-            justify-content: space-between; padding: 0 4vw; align-items: center; z-index: 20;
-        }
-        .nav-btn { font-size: 6vw; cursor: pointer; opacity: 0.4; transition: 0.3s; padding: 20px; }
+        #font-indicator { position: fixed; bottom: env(safe-area-inset-bottom, 3vh); left: 4vw; font-size: 1.5vw; font-weight: bold; opacity: 0.4; font-family: monospace; z-index: 20; transition: opacity 0.3s; }
+        .font-nav { position: fixed; bottom: env(safe-area-inset-bottom, 3vh); width: 100%; display: flex; justify-content: space-between; padding: 0 4vw; align-items: center; z-index: 20; transition: opacity 0.3s; }
+        .nav-btn { font-size: 8vw; cursor: pointer; opacity: 0.4; padding: 20px; }
         .footer-guide { font-size: 1.2vw; opacity: 0.5; flex: 1; text-align: center; }
 
-        #menu {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(15, 15, 15, 0.98); color: white; padding: 30px; border-radius: 12px; border: 1px solid #444;
-            display: none; z-index: 1000; width: 90%; max-width: 550px; max-height: 85vh; overflow-y: auto;
-            user-select: auto;
-        }
+        #menu { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(15, 15, 15, 0.98); color: white; padding: 30px; border-radius: 12px; border: 1px solid #444; display: none; z-index: 1000; width: 90%; max-width: 550px; max-height: 85vh; overflow-y: auto; user-select: auto; }
         .section-title { border-bottom: 1px solid #444; margin: 15px 0 10px; padding-bottom: 5px; color: #39ff14; font-size: 13px; font-weight: bold; }
-        textarea { width: 100%; padding: 10px; background: #222; color: white; border: 1px solid #444; border-radius: 4px; font-family: monospace; font-size: 16px; resize: vertical; }
+        textarea { width: 100%; padding: 10px; background: #222; color: white; border: 1px solid #444; border-radius: 4px; font-family: monospace; font-size: 16px; resize: vertical; user-select: auto; }
         #phase-list { list-style: none; padding: 0; margin: 0; }
         .phase-item { background: #222; padding: 12px; margin-bottom: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
         .phase-item.active { border: 1px solid var(--text-color); background: #2a2a2a; }
         button { padding: 12px 15px; cursor: pointer; border-radius: 4px; border: none; font-weight: bold; }
         .btn-bulk { background: #39ff14; color: black; margin-top: 5px; width: 100%; font-size: 16px; }
-        .btn-del { background: #aa3333; color: white; }
         .btn-close { background: #444; color: white; width: 100%; margin-top: 20px; font-size: 16px; }
         .menu-row { display: flex; gap: 10px; margin-bottom: 12px; }
         label { display: block; font-size: 11px; color: #888; margin-bottom: 4px; }
         select, input { width: 100%; padding: 12px; background: #222; color: white; border: 1px solid #444; font-size: 16px; }
+
+        /* 疑似フルスクリーン用スタイル */
+        .is-fullscreen .touch-controls, .is-fullscreen .font-nav, .is-fullscreen #font-indicator { opacity: 0 !important; pointer-events: none; }
     </style>
 </head>
-<body>
+<body onclick="onScreenTap()">
 
-    <div class="touch-controls">
-        <div class="control-btn" onclick="toggleMenu()">MENU</div>
-        <div class="control-btn" onclick="toggleFullscreen()">FULL</div>
+    <div class="touch-controls" id="controls">
+        <div class="control-btn" onclick="event.stopPropagation(); toggleMenu()">MENU</div>
+        <div class="control-btn" onclick="event.stopPropagation(); toggleFullscreen()">FULL</div>
     </div>
 
     <div id="font-indicator">MODE: 01</div>
@@ -117,35 +69,35 @@
     <div class="container">
         <div id="phase-area">
             <span id="display-phase-name"></span>
-            <span id="display-countdown-wrap">終了まで あと <span id="display-countdown">--</span>分</span>
+            <span id="display-countdown-wrap">あと <span id="display-countdown">--</span>分</span>
         </div>
         <div id="clock">
             <span id="h1" class="digit">0</span><span id="h2" class="digit">0</span><span class="colon blink">:</span><span id="m1" class="digit">0</span><span id="m2" class="digit">0</span>
         </div>
     </div>
 
-    <div class="font-nav">
-        <div class="nav-btn" onclick="changeFont(-1)">◀</div>
-        <div class="footer-guide">左右キーでフォント切替 / MENUボタンで設定</div>
-        <div class="nav-btn" onclick="changeFont(1)">▶</div>
+    <div class="font-nav" id="nav">
+        <div class="nav-btn" onclick="event.stopPropagation(); changeFont(-1)">◀</div>
+        <div class="footer-guide">左右キー:フォント切替 / FULL:全画面(タップ復帰)</div>
+        <div class="nav-btn" onclick="event.stopPropagation(); changeFont(1)">▶</div>
     </div>
 
     <div id="menu">
         <h3 style="margin:0 0 20px; text-align:center;">設定</h3>
-        <div class="section-title">一括登録（テキスト貼り付け）</div>
+        <div class="section-title">一括登録</div>
         <textarea id="bulk-input" rows="4" placeholder="13:10 OPトーク終了"></textarea>
         <div class="menu-row" style="margin-top:10px;">
-            <button class="btn-bulk" onclick="bulkRegister(true)">すべて上書き登録</button>
-            <button class="btn-bulk" style="background:#222; color:#39ff14; border:1px solid #39ff14;" onclick="bulkRegister(false)">末尾に追加</button>
+            <button class="btn-bulk" onclick="bulkRegister(true)">上書き登録</button>
+            <button class="btn-bulk" style="background:#222; color:#39ff14; border:1px solid #39ff14;" onclick="bulkRegister(false)">追加</button>
         </div>
-        <div class="section-title">進行スケジュール</div>
+        <div class="section-title">スケジュール</div>
         <ul id="phase-list"></ul>
         <div class="section-title">表示設定</div>
         <div class="menu-row">
-            <div style="flex:1"><label>文字の色</label><select id="color-select" onchange="updateThemeColor(this.value)"><option value="#39ff14">蛍光グリーン</option><option value="#00f3ff">蛍光ブルー</option><option value="#ff4444">蛍光レッド</option><option value="#ff00ff">蛍光ピンク</option><option value="#ffff00">蛍光イエロー</option><option value="#ffffff">ホワイト</option></select></div>
-            <div style="flex:1"><label>背景の色</label><input type="color" id="bg-select" value="#000000" onchange="updateBgColor(this.value)"></div>
+            <div style="flex:1"><label>色</label><select id="color-select" onchange="updateThemeColor(this.value)"><option value="#39ff14">蛍光グリーン</option><option value="#00f3ff">蛍光ブルー</option><option value="#ff4444">蛍光レッド</option><option value="#ff00ff">蛍光ピンク</option><option value="#ffff00">蛍光イエロー</option><option value="#ffffff">ホワイト</option></select></div>
+            <div style="flex:1"><label>背景</label><input type="color" id="bg-select" value="#000000" onchange="updateBgColor(this.value)"></div>
         </div>
-        <button class="btn-close" onclick="toggleMenu()">設定を閉じる</button>
+        <button class="btn-close" onclick="toggleMenu()">閉じる</button>
     </div>
 
     <script>
@@ -153,6 +105,7 @@
         let activeIndex = null;
         let currentFontIdx = 0;
         let isMenuOpen = false;
+        let isFullscreenMode = false;
 
         const fontStyles = [
             { name: "01", family: '"Helvetica Neue", Arial, sans-serif', weight: "900", dWidth: "0.65em", cMargin: "0.05em" },
@@ -163,15 +116,15 @@
 
         function init() {
             try {
-                const savedPhases = localStorage.getItem('eventPhasesV16');
+                const savedPhases = localStorage.getItem('eventPhasesV18');
                 if (savedPhases) phases = JSON.parse(savedPhases);
-                const savedIndex = localStorage.getItem('activePhaseIndexV16');
+                const savedIndex = localStorage.getItem('activePhaseIndexV18');
                 if (savedIndex !== null && savedIndex !== "null") activeIndex = parseInt(savedIndex);
-                currentFontIdx = parseInt(localStorage.getItem('fontIdxV16') || "0");
+                currentFontIdx = parseInt(localStorage.getItem('fontIdxV18') || "0");
             } catch (e) { console.error(e); }
             applyFont();
-            updateThemeColor(localStorage.getItem('themeColorV16') || "#39ff14");
-            updateBgColor(localStorage.getItem('bgColorV16') || "#000000");
+            updateThemeColor(localStorage.getItem('themeColorV18') || "#39ff14");
+            updateBgColor(localStorage.getItem('bgColorV18') || "#000000");
             renderList();
             setInterval(tick, 1000);
             tick();
@@ -189,7 +142,7 @@
 
         function changeFont(dir) {
             currentFontIdx = (currentFontIdx + dir + fontStyles.length) % fontStyles.length;
-            localStorage.setItem('fontIdxV16', currentFontIdx);
+            localStorage.setItem('fontIdxV18', currentFontIdx);
             applyFont();
         }
 
@@ -246,15 +199,39 @@
                 const li = document.createElement('li');
                 li.className = `phase-item ${i === activeIndex ? 'active' : ''}`;
                 li.onclick = () => selectPhase(i);
-                li.innerHTML = `<div style="font-family:sans-serif"><strong>${p.name}</strong><br><small style="color:#888">${p.time}</small></div><button class="btn-del" onclick="deletePhase(${i}, event)">削除</button>`;
+                li.innerHTML = `<div><strong>${p.name}</strong><br><small>${p.time}</small></div><button class="btn-del" onclick="deletePhase(${i}, event)">削除</button>`;
                 listEl.appendChild(li);
             });
         }
-        function save() { localStorage.setItem('eventPhasesV16', JSON.stringify(phases)); localStorage.setItem('activePhaseIndexV16', activeIndex); }
-        function updateThemeColor(hex) { document.documentElement.style.setProperty('--text-color', hex); document.documentElement.style.setProperty('--glow-color', hex + '99'); localStorage.setItem('themeColorV16', hex); }
-        function updateBgColor(hex) { document.documentElement.style.setProperty('--bg-color', hex); localStorage.setItem('bgColorV16', hex); }
+        function save() { localStorage.setItem('eventPhasesV18', JSON.stringify(phases)); localStorage.setItem('activePhaseIndexV18', activeIndex); }
+        function updateThemeColor(hex) { document.documentElement.style.setProperty('--text-color', hex); document.documentElement.style.setProperty('--glow-color', hex + '99'); localStorage.setItem('themeColorV18', hex); }
+        function updateBgColor(hex) { document.documentElement.style.setProperty('--bg-color', hex); localStorage.setItem('bgColorV18', hex); }
         function toggleMenu() { isMenuOpen = !isMenuOpen; document.getElementById('menu').style.display = isMenuOpen ? 'block' : 'none'; }
-        function toggleFullscreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); else document.exitFullscreen(); }
+        
+        function toggleFullscreen() {
+            isFullscreenMode = !isFullscreenMode;
+            if (isFullscreenMode) {
+                document.body.classList.add('is-fullscreen');
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen().catch(()=>{});
+                }
+            } else {
+                document.body.classList.remove('is-fullscreen');
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().catch(()=>{});
+                }
+            }
+        }
+
+        function onScreenTap() {
+            if (isFullscreenMode && !isMenuOpen) {
+                isFullscreenMode = false;
+                document.body.classList.remove('is-fullscreen');
+                if (document.exitFullscreen && document.fullscreenElement) {
+                    document.exitFullscreen().catch(()=>{});
+                }
+            }
+        }
 
         window.addEventListener('keydown', (e) => { 
             if (isMenuOpen || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') { if (e.key.toLowerCase() === 's') toggleMenu(); return; }
