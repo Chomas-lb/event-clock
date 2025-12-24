@@ -1,4 +1,4 @@
-<img width="1327" height="808" alt="スクリーンショット 2025-12-24 204615" src="https://github.com/user-attachments/assets/afb60eac-1389-4397-b2bb-2161a30162d3" />
+<img width="1334" height="811" alt="スクリーンショット 2025-12-24 210727" src="https://github.com/user-attachments/assets/da36cba7-6880-4b0b-9ea0-b6577e3c2553" />
 ## デモ
 https://chomas-lb.github.io/event-clock/
 
