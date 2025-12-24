@@ -1,5 +1,4 @@
-<img width="1318" height="806" alt="スクリーンショット 2025-12-24 181530" src="https://github.com/user-attachments/assets/a02ea3dd-696c-4588-8232-edb713a22a8e" />
-
+<img width="1327" height="808" alt="スクリーンショット 2025-12-24 204615" src="https://github.com/user-attachments/assets/afb60eac-1389-4397-b2bb-2161a30162d3" />
 ## デモ
 https://chomas-lb.github.io/event-clock/
 
@@ -9,4 +8,4 @@ https://chomas-lb.github.io/event-clock/
 
 イベントの現場用に見やすく、CMなどもない物が欲しくて作りました。
 
-PC・タブレット・外部モニタで表示しての使用を想定しています。
+携帯端末はブラウザ、横画面表示で使用してください。
